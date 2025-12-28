@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>INSTALLER.JS</title>
+<style>
+*{box-sizing:border-box;font-family:Consolas,monospace;}
+body{margin:0;height:100vh;display:flex;justify-content:center;align-items:center;
+background:linear-gradient(270deg,red,orange,green,cyan,blue,purple);
+background-size:1400% 1400%;animation:rainbow 15s ease infinite;}
+@keyframes rainbow{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.window{width:420px;background:#111;color:#fff;padding:30px;border-radius:18px;box-shadow:0 0 40px rgba(0,0,0,.8);text-align:center;}
+h1{margin:0;font-size:36px;} h1 span{color:#00ffcc;}
+.desc{margin-top:10px;opacity:.8;}
+.box{margin:20px 0;text-align:left;}
+button{width:100%;padding:12px;border-radius:8px;border:none;font-size:16px;cursor:pointer;background:#00ffcc;}
+button:disabled{background:#333;cursor:not-allowed;}
+.progress{margin-top:20px;height:10px;background:#222;border-radius:5px;overflow:hidden;}
+.bar{height:100%;width:0%;background:linear-gradient(90deg,#00ffcc,#00ccff);transition:width .3s;}
+.status{margin-top:10px;font-size:13px;opacity:.85;}
+</style>
+</head>
+<body>
+<div class="window">
+  <h1>INSTALLER.<span>JS</span></h1>
+  <p class="desc">Instalador oficial baseado em JavaScript</p>
+  <div class="box">
+    <label><input type="checkbox" id="accept"> Eu aceito os termos</label>
+  </div>
+  <button id="install" disabled>Instalar</button>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+const { ipcRenderer } = require('electron');
+const accept = document.getElementById("accept");
+const installBtn = document.getElementById("install");
+const bar = document.getElementById("bar");
+const status = document.getElementById("status");
+
+accept.addEventListener("change", ()=>{ installBtn.disabled = !accept.checked; });
+
+installBtn.addEventListener("click", async ()=>{
+  installBtn.disabled = true;
+  status.innerText="Instalando...";
+
+  // Copia arquivos do payload
+  await ipcRenderer.invoke("install-files");
+
+  // Atualiza barra de 0→100 real
+  ipcRenderer.on("progress", (e, val)=>{ bar.style.width = val+"%"; });
+
+  // OPCIONAL: baixar do GitHub
+  // await ipcRenderer.invoke("download-github","https://github.com/user/repo/raw/main/file.exe","file.exe");
+
+  status.innerText="Instalação concluída com sucesso!";
+  setTimeout(()=>{ window.close(); },1500);
+});
+</script>
+</body>
+</html>

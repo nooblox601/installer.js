@@ -1,0 +1,4 @@
+INSTALLER.JS
+
+Este software é fornecido "como está".
+Uso por sua conta e risco.
